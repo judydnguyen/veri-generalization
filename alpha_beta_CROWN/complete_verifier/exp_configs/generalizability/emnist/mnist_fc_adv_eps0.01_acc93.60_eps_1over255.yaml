@@ -1,0 +1,25 @@
+model:
+  name: mnist_fc
+  # path: /home/judy/code/unlearning-verification/checkpoints/mnistfc/mnist_fc.pt
+  path: /home/judy/code/unlearning-verification/checkpoints/mnistfc/mnist_fc_adv_eps0.01_acc93.60.pt
+  input_shape: [-1, 1, 28, 28]
+
+general:
+  # The csv file contains a list of vnnlib specifications.
+  root_path: /home/judy/code/unlearning-verification/alpha_beta_CROWN/complete_verifier/generate_properties/mnistfc/emnist
+  csv_name: emnistfc_instances_eps1over255.csv
+  enable_incomplete_verification: False
+data:
+  dataset: emnist
+  start: 0
+  end: 100
+  std: [1.]
+  mean: [0.]
+attack:
+  pgd_restarts: 50
+solver:
+  batch_size: 1024
+  beta-crown:
+    iteration: 20
+bab:
+  timeout: 60

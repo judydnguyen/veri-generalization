@@ -1,0 +1,24 @@
+# This is an example configuration file that contains most useful parameter settings.
+model:
+  name: simple_cnn_mnist  # This model is defined in model_defs.py. Add your own model definitions there.
+  path: /home/judy/code/unlearn_project/checkpoints/cnn_mnist_pretrained.pth # Path to PyTorch checkpoint.
+data:
+  dataset: MNIST
+  start: 0
+  end: 100
+  std: [0.3081]
+  mean: [0.1307]
+specification:
+  epsilon: 0.2
+  norm: .inf
+attack:
+  pgd_restarts: 50
+solver:
+  batch_size: 1024
+  beta-crown:
+    iteration: 20
+bab:
+  timeout: 180
+general:
+  save_adv_example: true
+  device: cuda

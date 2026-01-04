@@ -1,0 +1,5 @@
+Model,Model_Path,Clean_Accuracy,Robust_Acc_eps0.003922,Robust_Acc_eps0.007843,Robust_Acc_eps0.011765,Robust_Acc_eps0.015686
+model_A,/data/judy/code/unlearning-verification/checkpoints/mnistfc/mnist_fc.pt,93.5000,88.9000,78.5000,64.7000,49.3000
+model_B,/data/judy/code/unlearning-verification/checkpoints/mnistfc/mnist_fc_adv_eps0.03_acc93.17.pt,92.4000,91.5000,90.5000,90.1000,88.9000
+model_C,/data/judy/code/unlearning-verification/checkpoints/mnistfc/mnist_fc_adv_eps0.01_acc93.60.pt,92.9000,90.6000,88.5000,83.9000,78.9000
+model_D,/data/judy/code/unlearning-verification/checkpoints/mnistfc/mnist_fc_adv_eps0.05_acc93.24.pt,92.8000,92.1000,91.2000,90.2000,89.1000
