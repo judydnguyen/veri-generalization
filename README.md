@@ -276,6 +276,8 @@ Or simply using the current code:
 python create_final_table.py
 ```
 
+![Final Results](final_results_plots.png)
+
 ---
 
 ## Directory Structure
