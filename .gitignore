@@ -220,3 +220,6 @@ datasets/
 mnist_pixmix_ood/
 mnist_pixmix_ood_bak/
 alpha_beta_CROWN/complete_verifier/datasets
+fractals_and_fvis/*
+fractals_and_fvis*
+gtsrb_pixmix_ood/
