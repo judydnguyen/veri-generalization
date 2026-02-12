@@ -848,9 +848,9 @@ if __name__ == "__main__":
                         help='Output directory for generated properties')
     parser.add_argument('--onnx_models', type=str, nargs='+', default=None,
                         help='Paths to ONNX models (optional)')
-    parser.add_argument('--epsilons', type=float, nargs='+', 
-                        default=[1/255, 2/255, 3/255, 4/255],
-                        help='Epsilon values for perturbation')
+    parser.add_argument('--epsilons', type=str, nargs='+',
+                        default=['1/255', '2/255', '3/255', '4/255'],
+                        help='Epsilon values (e.g., 1/255 2/255 or 0.00392)')
     parser.add_argument('--samples_per_class', type=int, default=10,
                         help='Number of samples per class')
     parser.add_argument('--img_size', type=int, default=32,
@@ -859,7 +859,15 @@ if __name__ == "__main__":
                         help='Random seed for reproducibility')
     
     args = parser.parse_args()
-    
+
+    # Parse epsilon strings (supports fractions like "1/255" and decimals like "0.004")
+    def parse_eps(s):
+        if '/' in s:
+            num, den = s.split('/')
+            return float(num) / float(den)
+        return float(s)
+    args.epsilons = [parse_eps(e) for e in args.epsilons]
+
     # Default ONNX models if not specified
     if args.onnx_models is None:
         default_models = [
@@ -886,3 +894,26 @@ if __name__ == "__main__":
         img_size=args.img_size,
         seed=args.seed,
     )
+
+
+# python generate_btsd_properties.py \
+#   --btsd_root /data/judy/code/veri-generalization/datasets/BTSC/Testing \
+#   --btsd_csv /data/judy/code/veri-generalization/datasets/BTSC/labels.csv \
+#   --gtsrb_root /data/judy/code/veri-generalization/datasets/GTSRB/Train \
+#   --output_dir /data/judy/code/veri-generalization/generate_properties/gtsrb/btsd \
+#   --onnx_models \
+#     /data/judy/code/veri-generalization/generate_properties/gtsrb/3_30_30_QConv_16_3_QConv_32_2_Dense_43_ep_30.onnx \
+#     /data/judy/code/veri-generalization/generate_properties/gtsrb/3_48_48_QConv_32_5_MP_2_BN_QConv_64_5_MP_2_BN_QConv_64_3_BN_Dense_256_BN_Dense_43_ep_30.onnx \
+#     /data/judy/code/veri-generalization/generate_properties/gtsrb/3_64_64_QConv_32_5_MP_2_BN_QConv_64_5_MP_2_BN_QConv_64_3_MP_2_BN_Dense_1024_BN_Dense_43_ep_30.onnx \
+#   --samples_per_class 
+
+
+
+# cd generate_properties/gtsrb && /data/judy/conda/envs/alpha-beta-crown/bin/python generate_btsd_properties.py \
+#   --btsd_root /path/to/datasets/BTSC/Testing \
+#   --btsd_csv /path/to/datasets/BTSC/labels.csv \
+#   --gtsrb_root /path/to/datasets/GTSRB/gtsrb/GTSRB/Training \
+#   --output_dir ./btsd \
+#   --onnx_models 3_30_30_*.onnx 3_48_48_*.onnx 3_64_64_*.onnx \
+#   --samples_per_class 10
+# Note: --gtsrb_root must point to GTSRB Training (per-class dirs 00000/, 00001/, ...), not Final_Test/Images.

@@ -125,6 +125,21 @@ done
 # Change to complete_verifier directory
 cd "$COMPLETE_VERIFIER_DIR" || exit 1
 
+# Resolve CONFIG_DIR to absolute path for existence check
+CONFIG_DIR_ABS="$CONFIG_DIR"
+if [[ "$CONFIG_DIR" != /* ]]; then
+    CONFIG_DIR_ABS="$(cd "$CONFIG_DIR" 2>/dev/null && pwd)"
+    [[ -z "$CONFIG_DIR_ABS" ]] && CONFIG_DIR_ABS="$COMPLETE_VERIFIER_DIR/$CONFIG_DIR"
+fi
+if [[ ! -d "$CONFIG_DIR_ABS" ]]; then
+    echo -e "${RED}ERROR: Config directory does not exist: $CONFIG_DIR${NC}"
+    echo "  Resolved to: $CONFIG_DIR_ABS"
+    echo "  For this repo, use e.g.: --config-dir $COMPLETE_VERIFIER_DIR/exp_configs/generalizability/gtsrb"
+    exit 1
+fi
+# Use resolved path so find always has an absolute path
+CONFIG_DIR="$CONFIG_DIR_ABS"
+
 # Create log directory if it doesn't exist
 mkdir -p "$LOG_DIR"
 
@@ -214,10 +229,11 @@ get_relative_path() {
         return
     fi
     
-    # Check if to_dir is within from_dir
-    if [[ "$to_dir" == "$from_dir"* ]]; then
-        # Get relative path
+    # Check if to_dir is within from_dir (or equal)
+    if [[ "$to_dir" == "$from_dir" ]] || [[ "$to_dir" == "$from_dir"/* ]]; then
+        # Get relative path (handle to_dir == from_dir so strip yields empty)
         local rel_dir="${to_dir#$from_dir/}"
+        [[ "$rel_dir" == "$to_dir" ]] && rel_dir=""  # strip failed, same dir
         if [[ -z "$rel_dir" ]]; then
             echo "./$file_name"
         else
@@ -446,5 +462,11 @@ fi
 exit 0
 
 
-# cd /home/judy/code/unlearning-verification/alpha_beta_CROWN/complete_verifier/sh
-# ./run_all_configs.sh --pattern "mnist_fc_eps" --continue-on-error
+# Examples (run from alpha_beta_CROWN/complete_verifier/sh):
+#   ./run_all_configs.sh --pattern "mnist_fc_eps" --continue-on-error
+#   ./run_all_configs.sh --pattern "gtsrb_cnn_eps" --continue-on-error --config-dir ../exp_configs/generalizability/gtsrb
+# Or with absolute path (must exist):
+#   ./run_all_configs.sh --pattern "gtsrb_cnn_eps" --continue-on-error --config-dir /home/judy/code/veri-generalization/alpha_beta_CROWN/complete_verifier/exp_configs/generalizability/gtsrb
+
+# ./run_all_configs.sh --pattern "gtsrb_cnn_eps" --continue-on-error --config-dir /home/judy/code/veri-generalization/alpha_beta_CROWN/complete_verifier/exp_configs/generalizability/gtsrb --log-dir /home/judy/code/veri-generalization/alpha_beta_CROWN/expr03_logs/gtsrb
+# ./run_all_configs.sh --pattern "gtsrb_cnn_adv" --continue-on-error --config-dir /home/judy/code/veri-generalization/alpha_beta_CROWN/complete_verifier/exp_configs/generalizability/gtsrb --log-dir /home/judy/code/veri-generalization/alpha_beta_CROWN/expr03_logs/gtsrb
