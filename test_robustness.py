@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 import csv
@@ -21,9 +22,6 @@ from alpha_beta_CROWN.complete_verifier.model_defs import mnist_fc
 # =========================
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
-DATASET = "mnist"          # mnist | fashionmnist
-DATA_ROOT = "./data"
-
 ARCH = "mnist_fc"          # same architecture, different weights
 
 # Use relative paths based on script location
@@ -36,7 +34,7 @@ MODEL_PATHS = {
 }
 
 BATCH_SIZE = 256
-N_EXAMPLES = 1000         # MNIST test set size
+N_EXAMPLES = 1000
 NORM = "Linf"              # Linf | L2
 
 # Common MNIST eps (pixel space [0,1])
@@ -72,13 +70,22 @@ def load_model(arch, ckpt_path):
 # =========================
 # Dataset
 # =========================
-def load_dataset(name):
+def load_dataset(name, data_root):
     tfm = transforms.ToTensor()  # keep in [0,1]
 
     if name == "mnist":
-        ds = datasets.MNIST(DATA_ROOT, train=False, download=True, transform=tfm)
+        ds = datasets.MNIST(data_root, train=False, download=True, transform=tfm)
+    elif name == "emnist":
+        # EMNIST-digits: same 10 classes as MNIST, 28x28 grayscale.
+        # Rotate + hflip to match MNIST orientation.
+        tfm = transforms.Compose([
+            transforms.Lambda(lambda img: transforms.functional.rotate(img, -90)),
+            transforms.Lambda(lambda img: transforms.functional.hflip(img)),
+            transforms.ToTensor(),
+        ])
+        ds = datasets.EMNIST(data_root, split="digits", train=False, download=True, transform=tfm)
     elif name == "fashionmnist":
-        ds = datasets.FashionMNIST(DATA_ROOT, train=False, download=True, transform=tfm)
+        ds = datasets.FashionMNIST(data_root, train=False, download=True, transform=tfm)
     else:
         raise ValueError(f"Unsupported dataset: {name}")
 
@@ -184,7 +191,20 @@ def save_results_to_csv(results, model_paths, filename="robustness_results.csv")
 # Main
 # =========================
 def main():
-    x_test, y_test = load_dataset(DATASET)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset", default="mnist", choices=["mnist", "emnist", "fashionmnist"])
+    parser.add_argument("--data_root", default="./datasets")
+    parser.add_argument("--ckpt_dir", default=None, help="Directory containing model checkpoints (overrides default)")
+    parser.add_argument("--output", default=None, help="Output CSV filename (default: <dataset>_robustness_results.csv)")
+    args = parser.parse_args()
+
+    output_file = args.output or f"{args.dataset}_robustness_results.csv"
+
+    if args.ckpt_dir:
+        for key in MODEL_PATHS:
+            MODEL_PATHS[key] = os.path.join(args.ckpt_dir, os.path.basename(MODEL_PATHS[key]))
+
+    x_test, y_test = load_dataset(args.dataset, args.data_root)
     results = {}
 
     for name, ckpt in MODEL_PATHS.items():
@@ -212,10 +232,8 @@ def main():
         print(f"  Clean Accuracy: {metrics['clean']*100:.2f}%")
         for eps in EPS_LIST:
             print(f"  eps={eps:.6f}: {metrics[eps]*100:.2f}%")
-    
-    # Save to CSV
-    save_results_to_csv(results, MODEL_PATHS)
-    
+
+    save_results_to_csv(results, MODEL_PATHS, filename=output_file)
     return results
 
 

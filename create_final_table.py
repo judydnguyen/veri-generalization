@@ -18,8 +18,16 @@ BASE_DIR = SCRIPT_DIR.parent / "veri-generalization"
 results_dir = BASE_DIR / "results"
 robustness_file = BASE_DIR / "robustness_results.csv"
 
-# Read robustness results
+# Read robustness results (per dataset)
 robustness_df = pd.read_csv(robustness_file)
+
+emnist_robustness_file = BASE_DIR / "emnist_robustness_results.csv"
+emnist_robustness_df = pd.read_csv(emnist_robustness_file) if emnist_robustness_file.exists() else None
+
+def get_robustness_df(dataset):
+    if dataset == 'EMNIST' and emnist_robustness_df is not None:
+        return emnist_robustness_df
+    return robustness_df
 
 # Read verification results
 mnist_results = pd.read_csv(results_dir / "final_results_mnist_fc.csv")
@@ -38,6 +46,9 @@ def normalize_path(path):
 # Note: column name is Model_Path (capital P) in robustness_results.csv
 robustness_df['model_filename'] = robustness_df['Model_Path'].apply(normalize_path)
 filename_to_model_id = dict(zip(robustness_df['model_filename'], robustness_df['Model']))
+
+if emnist_robustness_df is not None:
+    emnist_robustness_df['model_filename'] = emnist_robustness_df['Model_Path'].apply(normalize_path)
 
 # Debug: print the mapping
 print("Model filename to ID mapping:")
@@ -88,14 +99,15 @@ all_results['AA'] = np.nan
 for idx, row in all_results.iterrows():
     model_filename = row['model_filename']
     epsilon = row['epsilon']
-    
-    # Find matching model in robustness_df
-    matching_model = robustness_df[robustness_df['model_filename'] == model_filename]
+    dataset = row['dataset']
+
+    # Use dataset-specific robustness file
+    rb_df = get_robustness_df(dataset)
+    matching_model = rb_df[rb_df['model_filename'] == model_filename]
     if len(matching_model) > 0 and epsilon in epsilon_to_column:
         robust_acc_col = epsilon_to_column[epsilon]
         if robust_acc_col in matching_model.columns:
             robust_acc = matching_model[robust_acc_col].iloc[0]
-            # AA = Robust_Acc (use original values from robustness_results.csv)
             if pd.notna(robust_acc):
                 all_results.at[idx, 'AA'] = robust_acc
 
@@ -117,15 +129,15 @@ for idx, model_robust in robustness_df.iterrows():
     # Process each dataset
     for dataset in ['MNIST', 'EMNIST']:
         dataset_results = matching_results[matching_results['dataset'] == dataset]
-        
+
         if len(dataset_results) > 0:
             # Get average metrics across all epsilon values
             avg_safe = dataset_results['safe'].mean()
             avg_unsafe = dataset_results['unsafe'].mean()
             avg_CRA = dataset_results['CRA'].mean()
-            avg_AA = dataset_results['AA'].mean()  # AA from robustness_results.csv
+            avg_AA = dataset_results['AA'].mean()  # AA from per-dataset robustness file
             avg_time = dataset_results['time'].mean()
-            
+
             # Get metrics for epsilon = 4/255 (largest perturbation)
             eps4_results = dataset_results[dataset_results['epsilon'] == '4/255']
             if len(eps4_results) > 0:
@@ -138,12 +150,23 @@ for idx, model_robust in robustness_df.iterrows():
                 eps4_AA = None
                 eps4_safe = None
                 eps4_unsafe = None
-            
+
+            # Use dataset-specific clean/robust accuracy
+            rb_df = get_robustness_df(dataset)
+            rb_df['model_filename'] = rb_df['Model_Path'].apply(normalize_path)
+            matching_rb = rb_df[rb_df['model_filename'] == model_filename]
+            if len(matching_rb) > 0:
+                clean_acc = matching_rb['Clean_Accuracy'].iloc[0]
+                robust_acc_eps4 = matching_rb['Robust_Acc_eps0.015686'].iloc[0]
+            else:
+                clean_acc = model_robust['Clean_Accuracy']
+                robust_acc_eps4 = model_robust['Robust_Acc_eps0.015686']
+
             summary_data.append({
                 'Model': model_id,
                 'Dataset': dataset,
-                'Clean_Accuracy': model_robust['Clean_Accuracy'],
-                'Robust_Acc_eps0.015686': model_robust['Robust_Acc_eps0.015686'],
+                'Clean_Accuracy': clean_acc,
+                'Robust_Acc_eps0.015686': robust_acc_eps4,
                 'Avg_Safe': round(avg_safe, 1),
                 'Avg_Unsafe': round(avg_unsafe, 1),
                 'Avg_CRA (%)': round(avg_CRA, 2),
