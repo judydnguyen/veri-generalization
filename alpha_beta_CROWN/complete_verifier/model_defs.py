@@ -1769,3 +1769,26 @@ class Step_carvana(nn.Module):
         x = x.sum(1, keepdim=True)
 
         return x
+
+
+########################################
+# GTSRB Models
+########################################
+
+def gtsrb_cnn():
+    """CNN for GTSRB traffic sign classification (32x32x3 -> 43 classes)"""
+    model = nn.Sequential(
+        nn.Conv2d(3, 32, 3, stride=1, padding=1),
+        nn.ReLU(),
+        nn.Conv2d(32, 32, 4, stride=2, padding=1),  # -> 16x16
+        nn.ReLU(),
+        nn.Conv2d(32, 64, 3, stride=1, padding=1),
+        nn.ReLU(),
+        nn.Conv2d(64, 64, 4, stride=2, padding=1),  # -> 8x8
+        nn.ReLU(),
+        nn.Flatten(),
+        nn.Linear(64 * 8 * 8, 512),
+        nn.ReLU(),
+        nn.Linear(512, 43)
+    )
+    return model

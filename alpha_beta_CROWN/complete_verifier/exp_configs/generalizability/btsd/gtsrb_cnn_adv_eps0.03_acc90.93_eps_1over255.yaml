@@ -1,0 +1,28 @@
+model:
+  name: gtsrb_cnn
+  path: /home/judy/code/veri-generalization/checkpoints/gtsrb/gtsrb_cnn_adv_eps0.03_acc90.93.pt
+  input_shape: [-1, 3, 32, 32]
+
+general:
+  # The csv file contains a list of vnnlib specifications.
+  root_path: /home/judy/code/veri-generalization/generate_properties/gtsrb/btsd
+  csv_name: btsd_instances_eps1over255.csv
+  enable_incomplete_verification: False
+
+data:
+  dataset: btsd
+  start: 0
+  end: 59
+  std: [1.]
+  mean: [0.]
+
+attack:
+  pgd_restarts: 50
+
+solver:
+  batch_size: 1024
+  beta-crown:
+    iteration: 20
+
+bab:
+  timeout: 60

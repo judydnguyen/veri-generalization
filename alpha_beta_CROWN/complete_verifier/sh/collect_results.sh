@@ -149,3 +149,5 @@ echo "==========================================================================
 
 #  ./collect_results.sh /home/judy/code/unlearning-verification/alpha_beta_CROWN/expr01_logs/mnist --output /home/judy/code/unlearning-verification/results/final_results_mnist_fc.csv
 # ./collect_results.sh expr01_logs --output /home/judy/code/unlearning-verification/results/final_results_mnist_fc.csv
+
+# ./collect_results.sh expr03_logs --output /home/judy/code/unlearning-verification/results/final_results_gtsrb_cnn.csv

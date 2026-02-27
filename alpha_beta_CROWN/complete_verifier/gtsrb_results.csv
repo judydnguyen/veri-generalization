@@ -1,0 +1,3 @@
+log_file,epsilon,safe,unsafe,unknown,time,model_path
+,1/255,147,50,18,14.6031,/data/judy/code/veri-generalization/checkpoints/gtsrb/gtsrb_cnn_adv_eps0.01_acc88.61.pt
+,2/255,0,0,0,0.0000,/data/judy/code/veri-generalization/checkpoints/gtsrb/gtsrb_cnn_adv_eps0.01_acc88.61.pt
