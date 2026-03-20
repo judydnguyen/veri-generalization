@@ -1,5 +1,7 @@
 import argparse
 import os
+import random
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -7,6 +9,15 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from alpha_beta_CROWN.complete_verifier.model_defs import mnist_fc
+
+
+def set_seed(seed: int):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 # -------------------------------
@@ -64,8 +75,8 @@ def train_mnist(
     transform = transforms.ToTensor()
 
     # Datasets and loaders
-    train_set = torchvision.datasets.MNIST(root="./data", train=True, transform=transform, download=True)
-    test_set = torchvision.datasets.MNIST(root="./data", train=False, transform=transform, download=True)
+    train_set = torchvision.datasets.MNIST(root="./datasets", train=True, transform=transform, download=True)
+    test_set = torchvision.datasets.MNIST(root="./datasets", train=False, transform=transform, download=True)
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=4)
     test_loader = DataLoader(test_set, batch_size=256, shuffle=False, num_workers=4)
 
@@ -236,7 +247,10 @@ if __name__ == "__main__":
     parser.add_argument("--adv_steps", type=int, default=10)
     parser.add_argument("--checkpoint", type=str, default=None, help="Path to checkpoint file to load")
     parser.add_argument("--target_acc", type=float, default=None, help="Target test accuracy (0-1). Training stops early if reached.")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
     args = parser.parse_args()
+
+    set_seed(args.seed)
 
     train_mnist(
         epochs=args.epochs,
@@ -252,4 +266,5 @@ if __name__ == "__main__":
 
     # example usage: python train_mnist.py --use_adversarial --adv_epsilon 0.03 --adv_alpha 0.01 --adv_steps 10 --epochs 40 --batch_size 256 --lr 0.005
     # example usage: python train_mnist.py --checkpoint ./checkpoints/mnistfc/mnist_fc_adv_eps0.1_acc95.23.pt --epochs 10
-    # CUDA_VISIBLE_DEVICES=1 python train_mnist.py --checkpoint "/home/judy/code/unlearning-verification/checkpoints/mnistfc/mnist_fc.pt" --use_adversarial --adv_epsilon 0.01 --epochs 20 --target_acc 0.93
+    # CUDA_VISIBLE_DEVICES=1 python train_mnist.py --checkpoint "./checkpoints/mnistfc/mnist_fc.pt" --use_adversarial --adv_epsilon 0.01 --epochs 20 --target_acc 0.93
+    # python train_mnist.py --use_adversarial --adv_epsilon 0.03 --adv_alpha 0.01 --adv_steps 10 --epochs 40 --batch_size 256 --lr 0.005 --target_acc 0.93 --checkpoint "./checkpoints/mnistfc/mnist_fc.pt"

@@ -150,7 +150,7 @@ class ABCROWN:
         x = BoundedTensor(data, ptb).to(data.device)
         output = model.net(x)
         print_model(model.net)
-        print('Original output:', output)
+        # print('Original output:', output)
 
         # save output
         if arguments.Config['general']['save_output']:
@@ -275,7 +275,7 @@ class ABCROWN:
             data = data.to(self.model.device)
             x = BoundedTensor(data, ptb).to(data_lb.device)
             output = self.model.net(x).flatten()
-            print('Model prediction is:', output)
+            # print('Model prediction is:', output)
 
             # save output:
             if arguments.Config['general']['save_output']:
@@ -355,7 +355,7 @@ class ABCROWN:
         if enable_incomplete:
             final_name = model_incomplete.final_name
             init_global_ub = upper_bounds[final_name]
-            print('lA shape:', [lAitem.shape for lAitem in lA.values()])
+            # print('lA shape:', [lAitem.shape for lAitem in lA.values()])
             (batched_vnnlib, init_global_lb, init_global_ub,
             lA, attack_images) = sort_targets(
                 batched_vnnlib, init_global_lb, init_global_ub,
@@ -481,9 +481,9 @@ class ABCROWN:
                     init_verified_cond = rlb.flatten() > rhs.flatten()
                     init_verified_idx = torch.where(init_verified_cond)[0]
                     if len(init_verified_idx) > 0:
-                        print('Initial alpha-CROWN verified for spec index '
-                                f'{init_verified_idx} with bound '
-                                f'{rlb[init_verified_idx].squeeze()}.')
+                        # print('Initial alpha-CROWN verified for spec index '
+                        #         f'{init_verified_idx} with bound '
+                        #         f'{rlb[init_verified_idx].squeeze()}.')
                         l = init_global_lb[init_verified_idx].tolist()
                         bab_ret.append([index, l, 0, time.time() - start_time_bab, pidx])
                     init_failure_idx = torch.where(~init_verified_cond)[0]
@@ -717,8 +717,8 @@ class ABCROWN:
                     print('Warning: Changing the RHS offset to the worst PGD '
                           'upper bound. If "rhs_offset" was set in the config/commandline, '
                           'it will be ignored.')
-                    print(f'Using PGD upper bound:\n{rhs_offset}.')
-                    print(f'Shape of attack_margins: {attack_margins.shape}')
+                    # print(f'Using PGD upper bound:\n{rhs_offset}.')
+                    # print(f'Shape of attack_margins: {attack_margins.shape}')
                     print(f'Verified success: {verified_success} -> False')
                     print(f'Verified success: {verified_status} -> \'unknown\'')
                     vnnlib = add_rhs_offset(vnnlib, rhs_offset)

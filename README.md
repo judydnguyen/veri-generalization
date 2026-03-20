@@ -273,7 +273,8 @@ plt.savefig('cra_vs_epsilon.png')
 
 Or simply using the current code:
 ```bash
-python create_final_table.py
+# Pass a different CSV
+python create_final_table.py /path/to/other_results.csv
 ```
 
 ![Final Results](final_results_plots.png)

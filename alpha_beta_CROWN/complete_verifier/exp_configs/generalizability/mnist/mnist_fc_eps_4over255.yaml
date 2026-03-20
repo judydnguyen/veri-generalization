@@ -1,12 +1,12 @@
 model:
   name: mnist_fc
-  # path: /home/judy/code/unlearning-verification/checkpoints/mnistfc/mnist_fc.pt
-  path: /home/judy/code/unlearning-verification/checkpoints/mnistfc/mnist_fc.pt
+  # path: /home/judy/code/veri-generalization/checkpoints/mnistfc/mnist_fc.pt
+  path: /home/judy/code/veri-generalization/checkpoints/mnistfc/mnist_fc.pt
   input_shape: [-1, 1, 28, 28]
 
 general:
   # The csv file contains a list of vnnlib specifications.
-  root_path: /home/judy/code/unlearning-verification/alpha_beta_CROWN/complete_verifier/generate_properties/mnistfc/mnist
+  root_path: /home/judy/code/veri-generalization/generate_properties/mnistfc/mnist
   csv_name: mnistfc_instances_eps4over255.csv
   enable_incomplete_verification: False
 data:

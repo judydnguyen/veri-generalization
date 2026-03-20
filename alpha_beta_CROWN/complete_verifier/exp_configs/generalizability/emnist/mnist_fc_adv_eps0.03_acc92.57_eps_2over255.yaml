@@ -1,7 +1,7 @@
 model:
   name: mnist_fc
   # path: /home/judy/code/veri-generalization/checkpoints/mnistfc/mnist_fc.pt
-  path: /home/judy/code/veri-generalization/checkpoints/mnistfc/mnist_fc.pt
+  path: /home/judy/code/veri-generalization/checkpoints/mnistfc/mnist_fc_adv_eps0.03_acc92.57.pt
   input_shape: [-1, 1, 28, 28]
 
 general:

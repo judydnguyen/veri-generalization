@@ -4,8 +4,8 @@
 # Example: ./generate_yml_configs_pixmix.sh model1.pt model2.pt --root_path /path/to/ood --eps_values "1 2 3 4"
 # 
 # Default paths:
-#   - Models: List of default model paths (see DEFAULT_MODEL_PATHS below)
-#   - Root: /home/judy/code/unlearning-verification/alpha_beta_CROWN/complete_verifier/generate_properties/mnistfc/mnist_pixmix_ood
+#   - Models: All *.pt files in DEFAULT_MODEL_DIR (see below)
+#   - Root: <CODE_DIR>/generate_properties/mnistfc/mnist_pixmix_ood
 #   - CSV files expected: mnist_ood_instances_eps{1,2,3,4}over255.csv
 
 set -e  # Exit on error
@@ -17,19 +17,24 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# CODE_DIR = repo root (veri-generalization/), 3 levels up from sh/
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CODE_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+
 # Default values for PixMix OOD
 DATASET="mnist"
-# Default list of model paths to process
-DEFAULT_MODEL_PATHS=(
-    "/home/judy/code/unlearning-verification/checkpoints/mnistfc/mnist_fc.pt"
-    "/home/judy/code/unlearning-verification/checkpoints/mnistfc/mnist_fc_adv_eps0.03_acc93.17.pt"
-    "/home/judy/code/unlearning-verification/checkpoints/mnistfc/mnist_fc_adv_eps0.01_acc93.60.pt"
-    "/home/judy/code/unlearning-verification/checkpoints/mnistfc/mnist_fc_adv_eps0.05_acc93.24.pt"
-)
-# Root path should point to where generate_pixmix_mnist_properties.py outputs files
-DEFAULT_ROOT_PATH="/home/judy/code/unlearning-verification/alpha_beta_CROWN/complete_verifier/generate_properties/mnistfc/mnist_pixmix_ood"
+# Default list of model paths to process (populated from DEFAULT_MODEL_DIR)
+DEFAULT_MODEL_DIR="${CODE_DIR}/checkpoints/mnistfc"
+DEFAULT_MODEL_PATHS=()
+if [ -d "$DEFAULT_MODEL_DIR" ]; then
+    while IFS= read -r -d '' f; do
+        DEFAULT_MODEL_PATHS+=("$f")
+    done < <(find "$DEFAULT_MODEL_DIR" -maxdepth 1 -name "*.pt" -print0 | sort -z)
+fi
+# Root path: CODE_DIR + generate_properties location for this model/dataset
+DEFAULT_ROOT_PATH="${CODE_DIR}/generate_properties/mnistfc/mnist_pixmix_ood"
 DEFAULT_EPS_VALUES="1 2 3 4"
-DEFAULT_OUTPUT_DIR="/home/judy/code/unlearning-verification/alpha_beta_CROWN/complete_verifier/exp_configs/generalizability/mnist_pixmix_ood"
+DEFAULT_OUTPUT_DIR="${CODE_DIR}/alpha_beta_CROWN/complete_verifier/exp_configs/generalizability/mnist_pixmix_ood"
 DEFAULT_MODEL_NAME="mnist_fc"
 
 # Parse command line arguments
@@ -141,7 +146,7 @@ for MODEL_PATH in "${MODEL_PATHS[@]}"; do
         cat > "$OUTPUT_FILE" << EOF
 model:
   name: ${MODEL_NAME}
-  # path: /home/judy/code/unlearning-verification/checkpoints/mnistfc/mnist_fc.pt
+  # path: ${DEFAULT_MODEL_DIR}/mnist_fc.pt
   path: ${MODEL_PATH}
   input_shape: [-1, 1, 28, 28]
 

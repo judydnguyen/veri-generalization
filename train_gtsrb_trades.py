@@ -1,5 +1,7 @@
 import argparse
 import os
+import random
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -7,6 +9,15 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from alpha_beta_CROWN.complete_verifier.model_defs import gtsrb_cnn
+
+
+def set_seed(seed: int):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 # -------------------------------
@@ -113,6 +124,8 @@ def train_gtsrb_trades(
     checkpoint_path=None,
     target_acc=None,
     use_scheduler=False,
+    clean_finetune_epochs=0,
+    clean_finetune_lr=1e-5,
 ):
     """
     Train GTSRB CNN model using TRADES adversarial training.
@@ -126,18 +139,27 @@ def train_gtsrb_trades(
         checkpoint_path: Path to checkpoint file to load.
         target_acc: Target clean test accuracy (0-1). Stops early if reached.
         use_scheduler: Use cosine annealing LR scheduler.
+        clean_finetune_epochs: Number of clean-only epochs appended after TRADES
+                               training to recover clean accuracy. 0 = disabled.
+        clean_finetune_lr: Learning rate for the clean fine-tune phase.
     """
 
     # NOTE: do NOT normalize - the alpha_beta_CROWN model expects raw [0,1] pixel values.
-    transform = transforms.Compose([
+    transform_train = transforms.Compose([
+        transforms.Resize((36, 36)),
+        transforms.RandomCrop(32),
+        transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2),
+        transforms.ToTensor(),
+    ])
+    transform_test = transforms.Compose([
         transforms.Resize((32, 32)),
         transforms.ToTensor(),
     ])
 
     # Datasets and loaders
     data_root = "./datasets/GTSRB"
-    train_set = torchvision.datasets.GTSRB(root=data_root, split="train", transform=transform, download=True)
-    test_set = torchvision.datasets.GTSRB(root=data_root, split="test", transform=transform, download=True)
+    train_set = torchvision.datasets.GTSRB(root=data_root, split="train", transform=transform_train, download=True)
+    test_set = torchvision.datasets.GTSRB(root=data_root, split="test", transform=transform_test, download=True)
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=4)
     test_loader = DataLoader(test_set, batch_size=256, shuffle=False, num_workers=4)
 
@@ -246,6 +268,45 @@ def train_gtsrb_trades(
             break
 
     # -------------------------------
+    # Clean fine-tune phase (optional)
+    # -------------------------------
+    if clean_finetune_epochs > 0:
+        print(f"\n{'='*60}")
+        print(f"Clean fine-tune phase: {clean_finetune_epochs} epoch(s) at lr={clean_finetune_lr}")
+        print(f"{'='*60}\n")
+        for param_group in optimizer.param_groups:
+            param_group['lr'] = clean_finetune_lr
+
+        for ft_epoch in range(1, clean_finetune_epochs + 1):
+            model.train()
+            correct, total, total_loss = 0, 0, 0.0
+            for images, labels in train_loader:
+                images, labels = images.to(device), labels.to(device)
+                optimizer.zero_grad()
+                outputs = model(images)
+                loss = F.cross_entropy(outputs, labels)
+                loss.backward()
+                optimizer.step()
+                total_loss += loss.item() * images.size(0)
+                correct += (outputs.argmax(1) == labels).sum().item()
+                total += labels.size(0)
+
+            print(
+                f"[Finetune] Epoch {ft_epoch}/{clean_finetune_epochs} | "
+                f"Loss: {total_loss/total:.4f} | Train Acc: {correct/total*100:.2f}%"
+            )
+            clean_acc = evaluate(model, test_loader, device)
+
+            if clean_acc > best_acc:
+                best_acc = clean_acc
+                best_path = f"./checkpoints/gtsrb/gtsrb_cnn_trades_eps{adv_epsilon}_beta{beta}_best.pt"
+                torch.save(model.state_dict(), best_path)
+
+            if target_acc is not None and clean_acc >= target_acc:
+                print(f"Target accuracy {target_acc*100:.2f}% reached during fine-tune!")
+                break
+
+    # -------------------------------
     # Save trained model
     # -------------------------------
     save_name = f"gtsrb_cnn_trades_eps{adv_epsilon}_beta{beta}_acc{clean_acc*100:.2f}.pt"
@@ -311,7 +372,14 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint", type=str, default=None, help="Path to checkpoint file to load")
     parser.add_argument("--target_acc", type=float, default=None, help="Target test accuracy (0-1). Stops early if reached.")
     parser.add_argument("--use_scheduler", action="store_true", help="Use cosine annealing LR scheduler")
+    parser.add_argument("--clean_finetune_epochs", type=int, default=0,
+                        help="Clean-only epochs appended after TRADES to recover clean accuracy (default: 0)")
+    parser.add_argument("--clean_finetune_lr", type=float, default=1e-5,
+                        help="Learning rate for clean fine-tune phase (default: 1e-5)")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
     args = parser.parse_args()
+
+    set_seed(args.seed)
 
     train_gtsrb_trades(
         epochs=args.epochs,
@@ -324,6 +392,8 @@ if __name__ == "__main__":
         checkpoint_path=args.checkpoint,
         target_acc=args.target_acc,
         use_scheduler=args.use_scheduler,
+        clean_finetune_epochs=args.clean_finetune_epochs,
+        clean_finetune_lr=args.clean_finetune_lr,
     )
 
     # Example usage:

@@ -463,10 +463,9 @@ exit 0
 
 
 # Examples (run from alpha_beta_CROWN/complete_verifier/sh):
-#   ./run_all_configs.sh --pattern "mnist_fc_eps" --continue-on-error
-#   ./run_all_configs.sh --pattern "gtsrb_cnn_eps" --continue-on-error --config-dir ../exp_configs/generalizability/gtsrb
-# Or with absolute path (must exist):
-#   ./run_all_configs.sh --pattern "gtsrb_cnn_eps" --continue-on-error --config-dir /home/judy/code/veri-generalization/alpha_beta_CROWN/complete_verifier/exp_configs/generalizability/gtsrb
-
-# ./run_all_configs.sh --pattern "gtsrb_cnn_eps" --continue-on-error --config-dir /home/judy/code/veri-generalization/alpha_beta_CROWN/complete_verifier/exp_configs/generalizability/gtsrb --log-dir /home/judy/code/veri-generalization/alpha_beta_CROWN/expr03_logs/gtsrb
-# ./run_all_configs.sh --pattern "gtsrb_cnn_adv" --continue-on-error --config-dir /home/judy/code/veri-generalization/alpha_beta_CROWN/complete_verifier/exp_configs/generalizability/gtsrb --log-dir /home/judy/code/veri-generalization/alpha_beta_CROWN/expr03_logs/gtsrb
+# Note: --config-dir and --log-dir are resolved relative to complete_verifier/ (not sh/)
+#   ./run_all_configs.sh --pattern "mnist_fc" --continue-on-error
+#   ./run_all_configs.sh --pattern "mnist_fc" --continue-on-error --config-dir exp_configs/generalizability/mnist --log-dir ../expr03_logs/mnist
+#   ./run_all_configs.sh --pattern "gtsrb_cnn" --continue-on-error --config-dir exp_configs/generalizability/gtsrb --log-dir ../expr03_logs/gtsrb
+#   ./run_all_configs.sh --pattern "gtsrb_cnn" --continue-on-error --config-dir exp_configs/generalizability/gtsrb_pixmix --log-dir ../expr03_logs/gtsrb_pixmix
+#   ./run_all_configs.sh --pattern "gtsrb_cnn_adv" --continue-on-error --config-dir exp_configs/generalizability/gtsrb --log-dir ../expr03_logs/gtsrb

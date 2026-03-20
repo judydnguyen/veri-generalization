@@ -12,6 +12,7 @@ Property (OOD):
 """
 
 import os
+import random
 import torch
 import numpy as np
 from PIL import Image
@@ -23,6 +24,8 @@ from collections import defaultdict
 # ============================================================
 # Configuration
 # ============================================================
+
+SEED = 42
 
 OOD_ROOT = "../../mnist_pixmix_ood"  # Update this path to point to your mnist_pixmix_ood directory
 OUTPUT_DIR = "./mnist_pixmix_ood"
@@ -187,6 +190,10 @@ def main():
     print("=" * 60)
     print("MNIST PixMix OOD Property Generator (Final)")
     print("=" * 60)
+
+    random.seed(SEED)
+    np.random.seed(SEED)
+    torch.manual_seed(SEED)
 
     # Load ONNX models
     sessions = []

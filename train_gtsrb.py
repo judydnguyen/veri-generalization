@@ -1,5 +1,7 @@
 import argparse
 import os
+import random
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -7,6 +9,15 @@ import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from alpha_beta_CROWN.complete_verifier.model_defs import gtsrb_cnn
+
+
+def set_seed(seed: int):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 # -------------------------------
@@ -64,15 +75,21 @@ def train_gtsrb(
     """
 
     # NOTE: do NOT normalize - the alpha_beta_CROWN model expects raw [0,1] pixel values.
-    transform = transforms.Compose([
+    transform_train = transforms.Compose([
+        transforms.Resize((36, 36)),
+        transforms.RandomCrop(32),
+        transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2),
+        transforms.ToTensor(),
+    ])
+    transform_test = transforms.Compose([
         transforms.Resize((32, 32)),
         transforms.ToTensor(),
     ])
 
     # Datasets and loaders
     data_root = "./datasets/GTSRB"
-    train_set = torchvision.datasets.GTSRB(root=data_root, split="train", transform=transform, download=True)
-    test_set = torchvision.datasets.GTSRB(root=data_root, split="test", transform=transform, download=True)
+    train_set = torchvision.datasets.GTSRB(root=data_root, split="train", transform=transform_train, download=True)
+    test_set = torchvision.datasets.GTSRB(root=data_root, split="test", transform=transform_test, download=True)
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=4)
     test_loader = DataLoader(test_set, batch_size=256, shuffle=False, num_workers=4)
 
@@ -281,7 +298,10 @@ if __name__ == "__main__":
     parser.add_argument("--target_acc", type=float, default=None, help="Target test accuracy (0-1). Training stops early if reached.")
     parser.add_argument("--mix_ratio", type=float, default=1.0, help="Fraction of batch for adversarial training (0.0=clean, 0.5=mixed, 1.0=all adv)")
     parser.add_argument("--use_scheduler", action="store_true", help="Use cosine annealing LR scheduler")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
     args = parser.parse_args()
+
+    set_seed(args.seed)
 
     train_gtsrb(
         epochs=args.epochs,
@@ -304,10 +324,10 @@ if __name__ == "__main__":
     #   python train_gtsrb.py --use_adversarial --adv_epsilon 0.01 --epochs 60 --lr 5e-4 --mix_ratio 0.5 --use_scheduler --checkpoint checkpoints/gtsrb/gtsrb_cnn_eps0.01_acc90.70.pt --target_acc 0.907
 
 
-# CUDA_VISIBLE_DEVICES=0 /data/judy/conda/envs/alpha-beta-crown/bin/python train_gtsrb_trades.py \
+# CUDA_VISIBLE_DEVICES=0 python train_gtsrb_trades.py \
 #   --adv_epsilon 0.01 --adv_alpha 0.003 --adv_steps 10 --beta 6.0 \
 #   --epochs 60 --lr 5e-4 --batch_size 128 --use_scheduler \
-#   --checkpoint checkpoints/gtsrb/gtsrb_cnn_eps0.01_acc90.70.pt
+#   --checkpoint checkpoints/gtsrb/gtsrb_cnn_eps0.01_acc90.16.pt
 
 # # GPU 1: eps=0.02, beta=3.0
 # CUDA_VISIBLE_DEVICES=1 /data/judy/conda/envs/alpha-beta-crown/bin/python train_gtsrb_trades.py \

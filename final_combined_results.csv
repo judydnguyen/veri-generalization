@@ -1,9 +1,13 @@
-Model,Dataset,Clean_Accuracy,Robust_Acc_eps0.015686,Avg_Safe,Avg_Unsafe,Avg_CRA (%),CRA_eps4/255 (%),Avg_AA (%),AA_eps4/255 (%),Eps4_Safe,Eps4_Unsafe,Avg_Time
-model_A,MNIST,93.5,49.3,75.5,24.2,75.5,56.0,70.35,49.3,56,43,0.7816
-model_A,EMNIST,52.2,25.6,37.8,62.0,37.75,26.0,35.25,25.6,26,73,0.4472
-model_B,MNIST,92.4,88.9,93.2,6.8,93.25,92.0,90.25,88.9,92,8,0.9774
-model_B,EMNIST,65.1,57.9,59.5,40.5,59.5,58.0,60.32,57.9,58,42,0.6347
-model_C,MNIST,92.9,78.9,88.0,12.0,88.0,84.0,85.48,78.9,84,16,0.9164
-model_C,EMNIST,59.3,39.3,49.5,50.5,49.5,39.0,46.2,39.3,39,61,0.5093
-model_D,MNIST,92.8,89.1,93.8,6.2,93.75,93.0,90.65,89.1,93,7,0.9999
-model_D,EMNIST,64.2,57.1,57.2,42.8,57.25,53.0,59.75,57.1,53,47,0.601
+Model,Dataset,Avg_Safe,Avg_Unsafe,Avg_CRA (%),CRA_eps4/255 (%),Eps4_Safe,Eps4_Unsafe,Avg_Time
+mnist_fc,MNIST,85.8,14.2,85.75,78.0,78,22,0.8662
+mnist_fc,EMNIST,46.5,53.5,46.5,38.0,38,62,0.4861
+mnist_fc,PixMix,55.5,44.2,55.5,47.0,47,52,0.5947
+mnist_fc_adv_eps0.01_acc93.17,MNIST,92.5,7.5,92.5,90.0,90,10,0.9481
+mnist_fc_adv_eps0.01_acc93.17,EMNIST,54.2,45.8,54.25,53.0,53,47,0.5576
+mnist_fc_adv_eps0.01_acc93.17,PixMix,67.8,32.2,67.75,64.0,64,36,0.6882
+mnist_fc_adv_eps0.02_acc92.60,MNIST,93.0,7.0,93.0,92.0,92,8,0.9645
+mnist_fc_adv_eps0.02_acc92.60,EMNIST,54.0,46.0,54.0,52.0,52,48,0.5602
+mnist_fc_adv_eps0.02_acc92.60,PixMix,68.8,31.2,68.75,67.0,67,33,0.7117
+mnist_fc_adv_eps0.03_acc92.57,MNIST,92.8,7.2,92.75,92.0,92,8,0.9534
+mnist_fc_adv_eps0.03_acc92.57,EMNIST,53.0,47.0,53.0,51.0,51,49,0.5473
+mnist_fc_adv_eps0.03_acc92.57,PixMix,67.8,32.2,67.75,65.0,65,35,0.6784
