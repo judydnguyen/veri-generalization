@@ -33,6 +33,8 @@ This will:
 - Save the checkpoint to `./checkpoints/mnistfc/mnist_fc.pt`
 - Output the final test accuracy
 
+Download pretrained checkpoints here: https://vanderbilt.box.com/s/zbfs5jn6zdbo3bojyf1gfmc9qxr8nmhj
+
 ### Training Adversarially Trained Models
 
 Starting from the plain model, train adversarially trained models with different epsilon values. Training stops when the target accuracy is reached:
