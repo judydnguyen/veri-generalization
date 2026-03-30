@@ -1,0 +1,13 @@
+Model,Dataset,Avg_Safe,Avg_Unsafe,Avg_CRA (%),CRA_eps4/255 (%),Eps4_Safe,Eps4_Unsafe,Avg_Time
+gtsrb_cnn,GTSRB,20.5,146.5,9.53,0.0,0,178,17.335
+gtsrb_cnn,BTSD,14.0,16.2,23.73,0.0,0,30,37.1414
+gtsrb_cnn,OOD-PixMix,9.2,148.5,4.3,0.0,0,182,19.5215
+gtsrb_cnn_trades_eps0.01_beta6.0_acc89.02,GTSRB,51.0,79.2,23.72,2.79,6,113,32.0499
+gtsrb_cnn_trades_eps0.01_beta6.0_acc89.02,BTSD,31.2,1.8,52.97,6.78,4,3,38.5287
+gtsrb_cnn_trades_eps0.01_beta6.0_acc89.02,OOD-PixMix,63.2,69.5,29.42,6.05,13,92,34.3823
+gtsrb_cnn_trades_eps0.02_beta3.0_acc87.26,GTSRB,60.5,80.2,28.14,4.19,9,109,26.9259
+gtsrb_cnn_trades_eps0.02_beta3.0_acc87.26,BTSD,36.5,1.5,61.86,10.17,6,3,35.0687
+gtsrb_cnn_trades_eps0.02_beta3.0_acc87.26,OOD-PixMix,71.0,75.2,33.02,8.84,19,102,30.2713
+gtsrb_cnn_trades_eps0.03_beta3.0_acc88.13,GTSRB,57.2,80.5,26.63,3.26,7,109,28.2278
+gtsrb_cnn_trades_eps0.03_beta3.0_acc88.13,BTSD,35.5,2.2,60.17,13.56,8,4,34.4931
+gtsrb_cnn_trades_eps0.03_beta3.0_acc88.13,OOD-PixMix,69.5,77.5,32.33,8.84,19,103,29.2847

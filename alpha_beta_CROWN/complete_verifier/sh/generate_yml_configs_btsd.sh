@@ -18,13 +18,14 @@ DATASET="btsd"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
-# Default list of model paths (latest: adv-trained eps 0.03)
-DEFAULT_MODEL_PATHS=(
-    "${PROJECT_ROOT}/checkpoints/gtsrb/gtsrb_cnn_eps0.01_acc90.70.pt"
-    "${PROJECT_ROOT}/checkpoints/gtsrb/gtsrb_cnn_adv_eps0.01_acc90.84.pt"
-    "${PROJECT_ROOT}/checkpoints/gtsrb/gtsrb_cnn_adv_eps0.02_acc90.61.pt"
-    "${PROJECT_ROOT}/checkpoints/gtsrb/gtsrb_cnn_adv_eps0.03_acc90.93.pt"
-)
+# Default list of model paths to process (populated from DEFAULT_MODEL_DIR)
+DEFAULT_MODEL_DIR="${PROJECT_ROOT}/checkpoints/gtsrb"
+DEFAULT_MODEL_PATHS=()
+if [ -d "$DEFAULT_MODEL_DIR" ]; then
+    while IFS= read -r -d '' f; do
+        DEFAULT_MODEL_PATHS+=("$f")
+    done < <(find "$DEFAULT_MODEL_DIR" -maxdepth 1 -name "*.pt" -print0 | sort -z)
+fi
 
 # Root path: where generate_btsd_properties.py outputs (btsd_instances_eps*over255.csv)
 DEFAULT_ROOT_PATH="${PROJECT_ROOT}/generate_properties/gtsrb/btsd"

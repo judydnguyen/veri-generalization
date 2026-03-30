@@ -18,14 +18,13 @@ DATASET="gtsrb"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
-# Default list of model paths to process
-DEFAULT_MODEL_PATHS=(
-    "${PROJECT_ROOT}/checkpoints/gtsrb/gtsrb_cnn_eps0.01_acc90.70.pt"
-    "${PROJECT_ROOT}/checkpoints/gtsrb/gtsrb_cnn_adv_eps0.01_acc90.84.pt"
-    "${PROJECT_ROOT}/checkpoints/gtsrb/gtsrb_cnn_adv_eps0.02_acc90.61.pt"
-    "${PROJECT_ROOT}/checkpoints/gtsrb/gtsrb_cnn_adv_eps0.03_acc90.93.pt"
-)
-
+DEFAULT_MODEL_DIR="${PROJECT_ROOT}/checkpoints/gtsrb"
+DEFAULT_MODEL_PATHS=()
+if [ -d "$DEFAULT_MODEL_DIR" ]; then
+    while IFS= read -r -d '' f; do
+        DEFAULT_MODEL_PATHS+=("$f")
+    done < <(find "$DEFAULT_MODEL_DIR" -maxdepth 1 -name "*.pt" -print0 | sort -z)
+fi
 # Root path should point to where generate_gtsrb_properties.py outputs files
 DEFAULT_ROOT_PATH="${PROJECT_ROOT}/generate_properties/gtsrb/gtsrb"
 DEFAULT_EPS_VALUES="1 2 3 4"

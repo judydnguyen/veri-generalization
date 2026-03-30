@@ -466,6 +466,6 @@ exit 0
 # Note: --config-dir and --log-dir are resolved relative to complete_verifier/ (not sh/)
 #   ./run_all_configs.sh --pattern "mnist_fc" --continue-on-error
 #   ./run_all_configs.sh --pattern "mnist_fc" --continue-on-error --config-dir exp_configs/generalizability/mnist --log-dir ../expr03_logs/mnist
-#   ./run_all_configs.sh --pattern "gtsrb_cnn" --continue-on-error --config-dir exp_configs/generalizability/gtsrb --log-dir ../expr03_logs/gtsrb
+#   ./run_all_configs.sh --pattern "gtsrb_cnn" --continue-on-error --config-dir exp_configs/generalizability/gtsrb --log-dir ../../expr03_logs/gtsrb
 #   ./run_all_configs.sh --pattern "gtsrb_cnn" --continue-on-error --config-dir exp_configs/generalizability/gtsrb_pixmix --log-dir ../expr03_logs/gtsrb_pixmix
 #   ./run_all_configs.sh --pattern "gtsrb_cnn_adv" --continue-on-error --config-dir exp_configs/generalizability/gtsrb --log-dir ../expr03_logs/gtsrb
